@@ -1,0 +1,6 @@
+/(vendor|system/vendor)/lib(64)?/libhoudini\.so		u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib/arm(/.*)?			u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib64/arm64(/.*)?		u:object_r:same_process_hal_file:s0
+/vendor/bin/arm(64)?(/.*)?				u:object_r:same_process_hal_file:s0
+/vendor/bin/houdini(64)?           			u:object_r:same_process_hal_file:s0
+

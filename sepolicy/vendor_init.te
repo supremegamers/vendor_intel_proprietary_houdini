@@ -1,0 +1,6 @@
+set_prop(vendor_init, vendor_houdini_prop)
+set_prop(vendor_init, exported_dalvik_prop)
+
+allow vendor_init binfmt_miscfs:file write;
+allow vendor_init binfmt_miscfs:chr_file { create setattr unlink rw_file_perms };
+

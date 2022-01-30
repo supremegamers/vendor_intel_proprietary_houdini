@@ -1,0 +1,2 @@
+ro.enable.native.bridge.    u:object_r:vendor_houdini_prop:s0
+ro.dalvik.vm.isa.   u:object_r:exported_dalvik_prop:s0

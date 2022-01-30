@@ -1,0 +1,4 @@
+allow shell same_process_hal_file:file rx_file_perms;
+allowxperm shell self:fifo_file ioctl TIOCGPTN;
+
+get_prop(shell, vendor_houdini_prop)
