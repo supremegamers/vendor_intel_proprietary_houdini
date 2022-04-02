@@ -1,12 +1,47 @@
-Processor	: ARMv7 processor rev 1 (v7l)
+processor	: 0
+model name	: ARMv7 Processor rev 4 (v7l)
 BogoMIPS	: 1500.0
 Features	: neon vfp swp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt
 CPU implementer	: 0x69
 CPU architecture: 7
 CPU variant	: 0x1
-CPU part	: 0x001
-CPU revision	: 1
+CPU part	: 0xd03
+CPU revision	: 4
 
-Hardware	: placeholder
-Revision	: 0001
-Serial		: 0000000000000001
+processor	: 1
+model name	: ARMv7 Processor rev 4 (v7l)
+BogoMIPS	: 1500.0
+Features	: neon vfp swp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt
+CPU implementer	: 0x69
+CPU architecture: 7
+CPU variant	: 0x1
+CPU part	: 0xd03
+CPU revision	: 4
+
+processor	: 2
+model name	: ARMv7 Processor rev 4 (v7l)
+BogoMIPS	: 1500.0
+Features	: neon vfp swp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt
+CPU implementer	: 0x69
+CPU architecture: 7
+CPU variant	: 0x1
+CPU part	: 0xd03
+CPU revision	: 4
+
+processor	: 3
+model name	: ARMv7 Processor rev 4 (v7l)
+BogoMIPS	: 1500.0
+Features	: neon vfp swp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt
+CPU implementer	: 0x69
+CPU architecture: 7
+CPU variant	: 0x1
+CPU part	: 0xd03
+CPU revision	: 4
+
+Hardware	: Qualcomm Technologies, Inc MSM8937
+Revision	: 8500
+Serial		: d693e67e00000000
+Processor	: ARMv7 Processor rev 4 (v7l)
+Device		: cedric
+Radio		: LATAM
+MSM Hardware	: MSM8937
