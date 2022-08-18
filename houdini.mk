@@ -16,5 +16,4 @@ PRODUCT_PROPERTY_OVERRIDES += \
     dalvik.vm.isa.x86.features=default
 
 HOUDINI_PATH := $(dir $(LOCAL_PATH))houdini/prebuilts
-PRODUCT_COPY_FILES += \
-    $(call find-copy-subdir-files,*,$(HOUDINI_PATH),$(TARGET_COPY_OUT_SYSTEM)/vendor)
+PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,$(HOUDINI_PATH),$(TARGET_COPY_OUT_SYSTEM))
