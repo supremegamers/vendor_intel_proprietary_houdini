@@ -8,6 +8,14 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.enable.native.bridge.exec64=1 \
     ro.dalvik.vm.native.bridge=libhoudini.so
 
-HOUDINI_PATH := $(dir $(LOCAL_PATH))houdini/prebuilts
-PRODUCT_COPY_FILES += \
-    $(call find-copy-subdir-files,*,$(HOUDINI_PATH),$(TARGET_COPY_OUT_SYSTEM)/vendor)
+PRODUCT_PACKAGES += \
+            houdini \
+            houdini64 \
+            houdini.rc \
+            arm_dyn \
+            arm_exe \
+            arm64_dyn \
+            arm64_exe \
+            libhoudini \
+            cpuinfo.arm.txt
+
