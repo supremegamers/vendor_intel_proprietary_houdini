@@ -11,7 +11,7 @@ LOCAL_POST_INSTALL_CMD := ln -sf /vendor/bin/houdini $(TARGET_OUT)/bin/houdini; 
 						  cp $(LOCAL_PATH)/prebuilts/bin/arm/linker $(TARGET_OUT_VENDOR)/bin/arm/linker; \
 						  ln -sf /vendor/bin/arm $(TARGET_OUT)/bin/arm; \
 						  mkdir -p $(TARGET_OUT_VENDOR)/lib/arm; \
-						  cp -r $(LOCAL_PATH)/prebuilts/lib/arm $(TARGET_OUT_VENDOR)/lib/arm; \
+						  cp -r $(LOCAL_PATH)/prebuilts/lib/arm $(TARGET_OUT_VENDOR)/lib; \
 						  ln -sf /vendor/lib/arm $(TARGET_OUT)/lib/arm
 include $(BUILD_PREBUILT)
 
@@ -26,7 +26,7 @@ LOCAL_POST_INSTALL_CMD := ln -sf /vendor/bin/houdini64 $(TARGET_OUT)/bin/houdini
 						  cp $(LOCAL_PATH)/prebuilts/bin/arm64/linker64 $(TARGET_OUT_VENDOR)/bin/arm64/linker64; \
 						  ln -sf /vendor/bin/arm64 $(TARGET_OUT)/bin/arm64; \
 						  mkdir -p $(TARGET_OUT_VENDOR)/lib64/arm64; \
-						  cp -r $(LOCAL_PATH)/prebuilts/lib64/arm64 $(TARGET_OUT_VENDOR)/lib64/arm64; \
+						  cp -r $(LOCAL_PATH)/prebuilts/lib64/arm64 $(TARGET_OUT_VENDOR)/lib64; \
 						  ln -sf /vendor/lib64/arm64 $(TARGET_OUT)/lib64/arm64
 include $(BUILD_PREBUILT)
 
