@@ -1,82 +1,42 @@
-Processor	: AArch64 Processor rev 1 (aarch64)
+Processor	: ARMv8 processor rev 1 (aarch64)
 processor	: 0
-model name	: ARMv8 Processor rev 4 (v8l)
-BogoMIPS	: 38.40
-Features	: neon vfp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt tls aes sha1 sha2 crc32 fp asimd pmull atomics
-CPU implementer	: 0x51
+model name	: ARMv8 Processor rev 1 (v8l)
+BogoMIPS	: 24.00
+Features	: neon vfp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt tls aes sha1 sha2 crc32
+CPU implementer	: 0x4e
 CPU architecture: 8
-CPU variant	: 0xa
-CPU part	: 0x801
-CPU revision	: 4
+CPU variant	: 0x02
+CPU part	: 0x000
+CPU revision	: 1
 
 processor	: 1
-model name	: ARMv8 Processor rev 4 (v8l)
-BogoMIPS	: 38.40
-Features	: neon vfp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt tls aes sha1 sha2 crc32 fp asimd pmull atomics
-CPU implementer	: 0x51
+model name	: ARMv8 Processor rev 1 (v8l)
+BogoMIPS	: 24.00
+Features	: neon vfp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt tls aes sha1 sha2 crc32
+CPU implementer	: 0x4e
 CPU architecture: 8
-CPU variant	: 0xa
-CPU part	: 0x801
-CPU revision	: 4
+CPU variant	: 0x02
+CPU part	: 0x000
+CPU revision	: 1
 
 processor	: 2
-model name	: ARMv8 Processor rev 4 (v8l)
-BogoMIPS	: 38.40
-Features	: neon vfp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt tls aes sha1 sha2 crc32 fp asimd pmull atomics
-CPU implementer	: 0x51
+model name	: ARMv8 Processor rev 1 (v8l)
+BogoMIPS	: 24.00
+Features	: neon vfp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt tls aes sha1 sha2 crc32
+CPU implementer	: 0x4e
 CPU architecture: 8
-CPU variant	: 0xa
-CPU part	: 0x801
-CPU revision	: 4
+CPU variant	: 0x02
+CPU part	: 0x000
+CPU revision	: 1
 
 processor	: 3
-model name	: ARMv8 Processor rev 4 (v8l)
-BogoMIPS	: 38.40
-Features	: neon vfp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt tls aes sha1 sha2 crc32 fp asimd pmull atomics
-CPU implementer	: 0x51
+model name	: ARMv8 Processor rev 1 (v8l)
+BogoMIPS	: 24.00
+Features	: neon vfp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt tls aes sha1 sha2 crc32
+CPU implementer	: 0x4e
 CPU architecture: 8
-CPU variant	: 0xa
-CPU part	: 0x801
-CPU revision	: 4
+CPU variant	: 0x02
+CPU part	: 0x000
+CPU revision	: 1
 
-processor	: 4
-model name	: ARMv8 Processor rev 4 (v8l)
-BogoMIPS	: 38.40
-Features	: neon vfp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt tls aes sha1 sha2 crc32 fp asimd pmull atomics
-CPU implementer	: 0x51
-CPU architecture: 8
-CPU variant	: 0xa
-CPU part	: 0x801
-CPU revision	: 4
-
-processor	: 5
-model name	: ARMv8 Processor rev 4 (v8l)
-BogoMIPS	: 38.40
-Features	: neon vfp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt tls aes sha1 sha2 crc32 fp asimd pmull atomics
-CPU implementer	: 0x51
-CPU architecture: 8
-CPU variant	: 0xa
-CPU part	: 0x801
-CPU revision	: 4
-
-processor	: 6
-model name	: ARMv8 Processor rev 4 (v8l)
-BogoMIPS	: 38.40
-Features	: neon vfp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt tls aes sha1 sha2 crc32 fp asimd pmull atomics
-CPU implementer	: 0x51
-CPU architecture: 8
-CPU variant	: 0xa
-CPU part	: 0x801
-CPU revision	: 4
-
-processor	: 7
-model name	: ARMv8 Processor rev 4 (v8l)
-BogoMIPS	: 38.40
-Features	: neon vfp half thumb fastmult edsp vfpv3 vfpv4 idiva idivt tls aes sha1 sha2 crc32 fp asimd pmull atomics
-CPU implementer	: 0x51
-CPU architecture: 8
-CPU variant	: 0xa
-CPU part	: 0x801
-CPU revision	: 4
-
-Hardware	: Qualcomm Technologies, Inc MSM8998
+Hardware	: placeholder
