@@ -4,6 +4,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := houdini
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_CLASS := EXECUTABLES
+LOCAL_CHECK_ELF_FILES := false
 LOCAL_PROPRIETARY_MODULE := true
 LOCAL_SRC_FILES := prebuilts/bin/houdini
 LOCAL_POST_INSTALL_CMD := ln -sf /vendor/bin/houdini $(TARGET_OUT)/bin/houdini; \
@@ -19,6 +20,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := houdini64
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_CLASS := EXECUTABLES
+LOCAL_CHECK_ELF_FILES := false
 LOCAL_PROPRIETARY_MODULE := true
 LOCAL_SRC_FILES := prebuilts/bin/houdini64
 LOCAL_POST_INSTALL_CMD := ln -sf /vendor/bin/houdini64 $(TARGET_OUT)/bin/houdini64; \
