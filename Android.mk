@@ -9,7 +9,6 @@ LOCAL_PROPRIETARY_MODULE := true
 LOCAL_SRC_FILES := prebuilts/bin/houdini
 LOCAL_POST_INSTALL_CMD := ln -sf /vendor/bin/houdini $(TARGET_OUT)/bin/houdini; \
 						  mkdir -p $(TARGET_OUT_VENDOR)/bin/arm; \
-						  cp $(LOCAL_PATH)/prebuilts/bin/arm/linker $(TARGET_OUT_VENDOR)/bin/arm/linker; \
 						  ln -sf /vendor/bin/arm $(TARGET_OUT)/bin/arm; \
 						  mkdir -p $(TARGET_OUT_VENDOR)/lib/arm; \
 						  cp -r $(LOCAL_PATH)/prebuilts/lib/arm $(TARGET_OUT_VENDOR)/lib; \
@@ -25,7 +24,6 @@ LOCAL_PROPRIETARY_MODULE := true
 LOCAL_SRC_FILES := prebuilts/bin/houdini64
 LOCAL_POST_INSTALL_CMD := ln -sf /vendor/bin/houdini64 $(TARGET_OUT)/bin/houdini64; \
 						  mkdir -p $(TARGET_OUT_VENDOR)/bin/arm64; \
-						  cp $(LOCAL_PATH)/prebuilts/bin/arm64/linker64 $(TARGET_OUT_VENDOR)/bin/arm64/linker64; \
 						  ln -sf /vendor/bin/arm64 $(TARGET_OUT)/bin/arm64; \
 						  mkdir -p $(TARGET_OUT_VENDOR)/lib64/arm64; \
 						  cp -r $(LOCAL_PATH)/prebuilts/lib64/arm64 $(TARGET_OUT_VENDOR)/lib64; \

@@ -1,10 +1,10 @@
 # Microsoft WSA Houdini for Intel/AMD x86 CPU
 
-`houdini` version: 12.0.0a_y.38818.m
+`houdini` version: 13.0.0_y.39129.m
 
-`houdini64` version: 12.0.0a_z.38818.m
+`houdini64` version: 13.0.0_z.39129.m
 
-Android image fingerprint: Windows/windows_x86_64/windows_x86_64:12/SQ3A.220705.004/2210.40000.7.0:user/release-keys
+Android image fingerprint: Windows/windows_x86_64/windows_x86_64:13/TP1A.221105.002/2211.40000.10.0:user/release-keys
 
 ## How to include it in your Android-x86 build :
 To include it, cherry-pick or make these commit as a reference:
