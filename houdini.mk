@@ -17,5 +17,6 @@ PRODUCT_PACKAGES += \
             arm64_dyn \
             arm64_exe \
             libhoudini \
-            cpuinfo.arm.txt
+            cpuinfo.arm.txt \
+            cpuinfo.arm64.txt
 

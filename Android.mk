@@ -87,6 +87,13 @@ LOCAL_SRC_FILES := prebuilts/lib64/arm64/cpuinfo
 include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := cpuinfo.arm64.txt
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_CLASS := ETC
+LOCAL_SRC_FILES := prebuilts/lib64/arm64/cpuinfo
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
 LOCAL_MULTILIB := both
 LOCAL_MODULE := libhoudini
 LOCAL_MODULE_SUFFIX :=.so
