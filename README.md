@@ -1,6 +1,7 @@
 # Intel's libhoudini for intel/AMD x86 CPU, pulled from Microsoft's WSA 11 image
 
 Version (x86) = 11.0.1b_y.38765.m
+
 Version (x86_64) = 11.0.1b_z.38765.m
 
 ## How to include it in your Android-x86 build :
