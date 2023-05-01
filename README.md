@@ -1,4 +1,4 @@
-# Microsoft WSA Houdini for Intel/AMD x86 CPU
+# Intel's libhoudini for intel/AMD x86 CPU, pulled from Microsoft's WSA 12L image
 
 `houdini` version: 12.0.0a_y.38818.m
 
