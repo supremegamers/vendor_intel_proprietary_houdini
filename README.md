@@ -1,6 +1,7 @@
 # Intel's libhoudini for intel/AMD x86 CPU, pulled from ChromeOS's arcvm image for `brya` Chromebooks
 
 Version (x86) = 11.0.1f_y.38795.g
+
 Version (x86_64) = 11.0.1f_z.38795.g
 
 ## How to include it in your Android-x86 build :
