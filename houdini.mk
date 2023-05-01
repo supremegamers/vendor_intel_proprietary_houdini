@@ -3,10 +3,11 @@ WITH_NATIVE_BRIDGE := true
 
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.dalvik.vm.isa.arm=x86 \
-    ro.enable.native.bridge.exec=1 \
+    ro.vendor.enable.native.bridge.exec=1 \
     ro.dalvik.vm.isa.arm64=x86_64 \
-    ro.enable.native.bridge.exec64=1 \
-    ro.dalvik.vm.native.bridge=libhoudini.so
+    ro.vendor.enable.native.bridge.exec64=1 \
+    ro.dalvik.vm.native.bridge=libhoudini.so \
+    ro.boot.kiwi.enable_houdini=1
 
 PRODUCT_PACKAGES += \
             houdini \

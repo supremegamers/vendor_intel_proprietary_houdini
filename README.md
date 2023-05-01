@@ -1,10 +1,10 @@
-# Microsoft WSA Houdini for Intel/AMD x86 CPU
+# Intel's libhoudini for intel/AMD x86 CPU, pulled from HPE image from Google Play Games for PC
 
-`houdini` version: 12.0.0a_y.38818.m
+`houdini` version: 12.0.0h_y.38865.g
 
-`houdini64` version: 12.0.0a_z.38818.m
+`houdini64` version: 12.0.0h_z.38865.g
 
-Android image fingerprint: Windows/windows_x86_64/windows_x86_64:12/SQ3A.220705.004/2210.40000.7.0:user/release-keys
+Android image fingerprint: google/kiwi_x86_64/vsoc_kiwi_x86_64:12/SKR1.230306.001.A3/9888534:user/release-keys
 
 ## How to include it in your Android-x86 build :
 To include it, cherry-pick or make these commit as a reference:
