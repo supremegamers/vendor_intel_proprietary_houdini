@@ -1,4 +1,4 @@
-# Intel's libhoudini for intel/AMD x86 CPU, pulled from ChromeOS's arcvm image for `brya` Chromebooks
+# Intel's libhoudini for Intel x86 CPU, pulled from ChromeOS's arcvm image for `brya` Chromebooks
 
 `houdini` version = 11.0.1f_y.38795.g
 
