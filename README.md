@@ -1,4 +1,4 @@
-# Intel's libhoudini for intel/AMD x86 CPU, pulled from ChromeOS's arcvm image for `hatch` Chromebooks
+# Intel's libhoudini for Intel x86 CPU, pulled from ChromeOS's arcvm image for `hatch` Chromebooks
 
 `houdini` version = 13.0.0a_y.39188.g
 
