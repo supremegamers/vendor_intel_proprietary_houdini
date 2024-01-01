@@ -1,10 +1,10 @@
 # Intel's libhoudini for intel/AMD x86 CPU, pulled from Microsoft's WSA 13 image
 
-`houdini` version: 13.0.0a_y.39168.m
+`houdini` version: 13.0.0a_y.39190.m
 
-`houdini64` version: 13.0.0a_z.39168.m
+`houdini64` version: 13.0.0a_z.39190.m
 
-Android image fingerprint: Windows/windows_x86_64/windows_x86_64:13/TQ2A.230305.008.C1/2303.40000.5.0:user/release-keys
+Android image fingerprint: Windows/windows_x86_64/windows_x86_64:13/TQ3A.230901.001/2311.40000.4.0:user/release-keys
 
 ## How to include it in your Android-x86 build :
 To include it, cherry-pick or make these commit as a reference:
