@@ -1,10 +1,10 @@
-# Intel's libhoudini for intel/AMD x86 CPU, pulled from Microsoft's WSA 12L image
+# Intel's libhoudini for intel/AMD x86 CPU, pulled from Tencent AoW Emulator
 
-`houdini` version: 12.0.0a_y.38818.m
+`houdini` version: 12.0.1.y.Tencent_AoW_Com5.9 (12.0.1_y.39067.m)
 
-`houdini64` version: 12.0.0a_z.38818.m
+`houdini64` version: 12.0.1.z.Tencent_AoW_Com5.9 (12.0.1_z.39067.m)
 
-Android image fingerprint: Windows/windows_x86_64/windows_x86_64:12/SQ3A.220705.004/2210.40000.7.0:user/release-keys
+Android image fingerprint: intel/caas/caas:12/SQ1A.220205.002/root12062147:user/release-keys
 
 ## How to include it in your Android-x86 build :
 To include it, cherry-pick or make these commit as a reference:
