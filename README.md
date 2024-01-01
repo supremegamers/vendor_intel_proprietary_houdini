@@ -1,10 +1,10 @@
-# Intel's libhoudini for Intel x86 CPU, pulled from ChromeOS's arcvm image for `brya` Chromebooks
+# Intel's libhoudini for Intel x86 CPU, pulled from ChromeOS's arcvm image for `volteer` Chromebooks
 
-`houdini` version = 11.0.1f_y.38795.g
+`houdini` version = 13.0.0a_y.39188.g
 
-`houdini64` version = 11.0.1f_z.38795.g
+`houdini64` version = 13.0.0a_z.39188.g
 
-Android image fingerprint : google/brya/brya_cheets:11/R112-15359.50.3/9891653:user/release-keys
+Android image fingerprint : google/volteer/volteer_cheets:13/R119-15633.69.0/11189719:user/release-keys
 
 ## How to include it in your Android-x86 build :
 * To include it, cherry-pick or make this commit as a reference :
