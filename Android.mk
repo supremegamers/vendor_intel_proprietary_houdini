@@ -7,12 +7,14 @@ LOCAL_MODULE_CLASS := EXECUTABLES
 LOCAL_CHECK_ELF_FILES := false
 LOCAL_PROPRIETARY_MODULE := true
 LOCAL_SRC_FILES := prebuilts/bin/houdini
+LOCAL_SHARED_LIBRARIES := libhoudini
 LOCAL_POST_INSTALL_CMD := ln -sf /vendor/bin/houdini $(TARGET_OUT)/bin/houdini; \
 						  mkdir -p $(TARGET_OUT_VENDOR)/bin/arm; \
 						  cp $(LOCAL_PATH)/prebuilts/bin/arm/linker $(TARGET_OUT_VENDOR)/bin/arm/linker; \
 						  ln -sf /vendor/bin/arm $(TARGET_OUT)/bin/arm; \
 						  mkdir -p $(TARGET_OUT_VENDOR)/lib/arm; \
 						  cp -r $(LOCAL_PATH)/prebuilts/lib/arm $(TARGET_OUT_VENDOR)/lib; \
+						  mkdir -p $(TARGET_OUT)/lib; \
 						  ln -sf /vendor/lib/arm $(TARGET_OUT)/lib/arm
 include $(BUILD_PREBUILT)
 
@@ -23,12 +25,14 @@ LOCAL_MODULE_CLASS := EXECUTABLES
 LOCAL_CHECK_ELF_FILES := false
 LOCAL_PROPRIETARY_MODULE := true
 LOCAL_SRC_FILES := prebuilts/bin/houdini64
+LOCAL_SHARED_LIBRARIES := libhoudini
 LOCAL_POST_INSTALL_CMD := ln -sf /vendor/bin/houdini64 $(TARGET_OUT)/bin/houdini64; \
 						  mkdir -p $(TARGET_OUT_VENDOR)/bin/arm64; \
 						  cp $(LOCAL_PATH)/prebuilts/bin/arm64/linker64 $(TARGET_OUT_VENDOR)/bin/arm64/linker64; \
 						  ln -sf /vendor/bin/arm64 $(TARGET_OUT)/bin/arm64; \
 						  mkdir -p $(TARGET_OUT_VENDOR)/lib64/arm64; \
 						  cp -r $(LOCAL_PATH)/prebuilts/lib64/arm64 $(TARGET_OUT_VENDOR)/lib64; \
+						  mkdir -p $(TARGET_OUT)/lib64; \
 						  ln -sf /vendor/lib64/arm64 $(TARGET_OUT)/lib64/arm64
 include $(BUILD_PREBUILT)
 
@@ -105,10 +109,14 @@ ifdef TARGET_2ND_ARCH
 LOCAL_SRC_FILES_32 := prebuilts/lib/libhoudini.so
 LOCAL_SRC_FILES_64 := prebuilts/lib64/libhoudini.so
 LOCAL_POST_INSTALL_CMD := \
+						  mkdir -p $(TARGET_OUT)/lib64; \
+						  mkdir -p $(TARGET_OUT)/lib; \
 						  ln -sf /vendor/lib64/libhoudini.so $(TARGET_OUT)/lib64/libhoudini.so; \
 						  ln -sf /vendor/lib/libhoudini.so $(TARGET_OUT)/lib/libhoudini.so
 else
 LOCAL_SRC_FILES := prebuilts/lib/libhoudini.so
-LOCAL_POST_INSTALL_CMD := ln -sf /vendor/lib/libhoudini.so $(TARGET_OUT)/lib/libhoudini.so
+LOCAL_POST_INSTALL_CMD := \
+						  mkdir -p $(TARGET_OUT)/lib; \
+						  ln -sf /vendor/lib/libhoudini.so $(TARGET_OUT)/lib/libhoudini.so
 endif
 include $(BUILD_PREBUILT)
