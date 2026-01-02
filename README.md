@@ -1,10 +1,10 @@
-# Intel's libhoudini for Intel x86 CPU, pulled from ChromeOS's arcvm image for `volteer` Chromebooks
+# Intel's libhoudini for Intel x86 CPU, pulled from ChromeOS's arcvm image for `octopus` Chromebooks
 
-`houdini` version = 13.0.1_y.39489.g
+`houdini` version = 13.0.1_y.39598.g
 
-`houdini64` version = 13.0.1_z.39489.g
+`houdini64` version = 13.0.1_z.39598.g
 
-Octopus Android image fingerprint : google/octopus/octopus_cheets:13/R130-16033.58.0/12608590:user/release-keys
+Octopus Android image fingerprint : google/octopus/octopus_cheets:13/R144-16503.18.0/14541889:user/release-keys
 
 Hatch Android image fingerprint : google/hatch/hatch_cheets:13/R130-16033.58.0/12608590:user/release-keys
 
