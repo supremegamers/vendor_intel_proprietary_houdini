@@ -1,10 +1,10 @@
 # Intel's libhoudini for Intel x86 CPU, pulled from HPE image from Google Play Games for PC
 
-`houdini` version = 14.0.0b_y.GoogleGame_com1.0
+`houdini` version = 14.0.0_y.GoogleGame_com1.2
 
-`houdini64` version = 14.0.0b_z.GoogleGame_com1.0
+`houdini64` version = 14.0.0_z.GoogleGame_com1.2
 
-HPE Android image fingerprint : google/kiwi_x86_64/vsoc_kiwi_x86_64:14/UKW1.250103.001/12869825:user/release-keys
+HPE Android image fingerprint : google/kiwi_x86_64/vsoc_kiwi_x86_64:14/UKW1.251130.001/14513382:user/release-keys
 
 ## How to include it in your Android-x86 build :
 * To include it, cherry-pick or make this commit as a reference :
