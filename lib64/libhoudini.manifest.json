@@ -1,0 +1,38 @@
+{
+  "checks": [
+    {
+      "bytes": "10",
+      "file_offset": 2691927,
+      "name": "pool_b_reset",
+      "vaddr": 2691927,
+      "was": "01"
+    },
+    {
+      "bytes": "10",
+      "file_offset": 2693068,
+      "name": "pool_b_init",
+      "vaddr": 2693068,
+      "was": "01"
+    },
+    {
+      "bytes": "ff",
+      "file_offset": 4480273,
+      "name": "ring_path_test",
+      "vaddr": 4480273,
+      "was": "02"
+    }
+  ],
+  "donor_sha256": "a252c506ea7435d99839f8ae741908f8c19e2d67a445919146128eabe7fee9cb",
+  "options": {
+    "dispatcher_stub": false,
+    "divisor_fix": false,
+    "init_threshold": false,
+    "mode_pin": null,
+    "no_ring_path": true,
+    "pool_a": null,
+    "pool_b": 16,
+    "wait_init": false
+  },
+  "patched_sha256": "5c4f83b03b6f5b1159fe19d32a65677e6529b02e866f154d59d28df48da8ec7c",
+  "tool": "patch-houdini-pool.py"
+}

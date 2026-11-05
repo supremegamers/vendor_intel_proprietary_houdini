@@ -1,0 +1,15 @@
+# libhoudini.so digests.
+#
+# Written by tools/apply-houdini-patch.sh, read by tools/check-houdini-blob.sh
+# and by the build (build.sh calls the checker before it builds the image).
+#
+# donor   the unmodified Intel blob the patch is applied to
+# patched the blob that ships in the image
+#
+# If the tree holds the donor, the image builds cleanly, boots cleanly and
+# then freezes in every game: the patch that gives pool B more than one
+# workspace lives in these bytes and nothing else in the build knows about
+# it. This happened once already (an image built before the patch was applied
+# to the tree), so the check is part of the build, not a manual step.
+donor a252c506ea7435d99839f8ae741908f8c19e2d67a445919146128eabe7fee9cb
+patched 5c4f83b03b6f5b1159fe19d32a65677e6529b02e866f154d59d28df48da8ec7c

@@ -1,0 +1,7 @@
+# Enable native bridge for target executables
+on early-init
+    mount binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
+
+on property:ro.dalvik.vm.native.bridge=libhoudini.so
+    copy /etc/houdini/binfmt_misc/arm64_exe /proc/sys/fs/binfmt_misc/register
+    copy /etc/houdini/binfmt_misc/arm64_dyn /proc/sys/fs/binfmt_misc/register
