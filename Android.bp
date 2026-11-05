@@ -1,0 +1,3363 @@
+// Intel Houdini native-bridge prebuilts (ARM64 aarch64 -> x86_64).
+// Replaces the berberis/libndk_translation bridge in ndk/Android.bp.
+//
+// cc_prebuilt_* rather than PRODUCT_COPY_FILES: the build refuses ELF
+// binaries copied that way (same rule as ndk/ and mesa/ prebuilts).
+//
+// Only what source cannot provide is prebuilt (4 modules): the translator
+// (libhoudini), its init companion (libtcb -- dlopen'ed by libhoudini at
+// init; missing it aborts every ARM process with Fatal 0x0190017f), the
+// binfmt runner (houdini64), and guest libc (the one guest lib with a source
+// install rule, hence stem+relative path). The other 411 guest libs in
+// /system/lib64/arm64 do NOT auto-build in this tree (verified 2026-10-14:
+// zero .native_bridge variants in out/), so they are staged as prebuilts in
+// the GENERATED BLOCK below (minus libc.so, which WOULD collide). The etc/
+// set (cpuinfo, binfmt_misc entries, init rc) is non-ELF and installed via
+// PRODUCT_COPY_FILES in device.mk, not here.
+
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+cc_defaults {
+    name: "houdini_prebuilt_defaults",
+    compile_multilib: "64",
+    strip: {
+        none: true,
+    },
+    // NEEDEDs resolve at runtime against the host system libs, which Soong
+    // cannot account for -- same reason as ndk_prebuilt_defaults /
+    // mesa_prebuilt_defaults. libhoudini.so also exports the NativeBridgeItf
+    // vtable that ART dlopen()s; not a standard Soong-visible ABI.
+    check_elf_files: false,
+}
+
+cc_prebuilt_library_shared {
+    name: "libhoudini",
+    defaults: ["houdini_prebuilt_defaults"],
+    // Installs to /system/lib64/libhoudini.so -- the exact path AndroidRuntime
+    // (frameworks/base/core/jni/AndroidRuntime.cpp) passes to ART via
+    // -XX:NativeBridge=ro.dalvik.vm.native.bridge, and ART dlopen()s from the
+    // system namespace (art/libnativebridge/native_bridge.cc OpenSystemLibrary).
+    srcs: ["lib64/libhoudini.so"],
+}
+
+cc_prebuilt_library_shared {
+    name: "libtcb",
+    defaults: ["houdini_prebuilt_defaults"],
+    // -> /system/lib64/libtcb.so. Companion libhoudini dlopen()s at init as
+    // <dir>/libtcb.so (dir = its own); a missing file aborts every ARM
+    // process AND bare `houdini64 -v` with Fatal error (ID:0x0190017f).
+    srcs: ["lib64/libtcb.so"],
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libc",
+    defaults: ["houdini_prebuilt_defaults"],
+    // Guest (ARM64) libc -> /system/lib64/arm64/libc.so. Same role as
+    // ndk/Android.bp's ndk_guest_libc; renamed to avoid a duplicate-module
+    // clash if both bridges are ever enabled together.
+    srcs: ["lib64/arm64/libc.so"],
+    stem: "libc",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_binary {
+    name: "houdini64",
+    defaults: ["houdini_prebuilt_defaults"],
+    // -> /system/bin/houdini64. The binfmt_misc handler referenced by
+    // etc/houdini/binfmt_misc/arm64_{exe,dyn} for arm64 (e_machine 0xb7).
+    srcs: ["bin/houdini64"],
+}
+// GENERATED BLOCK (guest-libs): do not hand-edit.
+// 411 ARM64 guest-lib prebuilts = full tested donor set
+// (/run/media/lenovo/Dev/libhoudini/lib64/arm64). EXCLUDED: libc.so
+// (ships via the houdini_guest_libc stem module).
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_aaudio-aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/aaudio-aidl-cpp.so"],
+    stem: "aaudio-aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_aconfig_mediacodec_flags_c_lib",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/aconfig_mediacodec_flags_c_lib.so"],
+    stem: "aconfig_mediacodec_flags_c_lib",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_aconfig_text_flags_c_lib",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/aconfig_text_flags_c_lib.so"],
+    stem: "aconfig_text_flags_c_lib",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_aconfig_view_accessibility_flags_c_lib",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/aconfig_view_accessibility_flags_c_lib.so"],
+    stem: "aconfig_view_accessibility_flags_c_lib",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_companion_virtual_virtualdevice_aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.companion.virtual.virtualdevice_aidl-cpp.so"],
+    stem: "android.companion.virtual.virtualdevice_aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_companion_virtualdevice_flags-aconfig-cc",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.companion.virtualdevice.flags-aconfig-cc.so"],
+    stem: "android.companion.virtualdevice.flags-aconfig-cc",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_database_sqlite-aconfig-cc",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.database.sqlite-aconfig-cc.so"],
+    stem: "android.database.sqlite-aconfig-cc",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_audio_common-V2-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.audio.common-V2-ndk.so"],
+    stem: "android.hardware.audio.common-V2-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_audio_common-V3-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.audio.common-V3-ndk.so"],
+    stem: "android.hardware.audio.common-V3-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_audio_common-V4-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.audio.common-V4-ndk.so"],
+    stem: "android.hardware.audio.common-V4-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_audio_common-V5-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.audio.common-V5-ndk.so"],
+    stem: "android.hardware.audio.common-V5-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_audio_core_sounddose-V1-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.audio.core.sounddose-V1-ndk.so"],
+    stem: "android.hardware.audio.core.sounddose-V1-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_audio_core_sounddose-V2-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.audio.core.sounddose-V2-ndk.so"],
+    stem: "android.hardware.audio.core.sounddose-V2-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_audio_core_sounddose-V3-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.audio.core.sounddose-V3-ndk.so"],
+    stem: "android.hardware.audio.core.sounddose-V3-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_audio_core_sounddose-V4-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.audio.core.sounddose-V4-ndk.so"],
+    stem: "android.hardware.audio.core.sounddose-V4-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_audio_sounddose-V1-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.audio.sounddose-V1-ndk.so"],
+    stem: "android.hardware.audio.sounddose-V1-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_audio_sounddose-V2-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.audio.sounddose-V2-ndk.so"],
+    stem: "android.hardware.audio.sounddose-V2-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_audio_sounddose-V3-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.audio.sounddose-V3-ndk.so"],
+    stem: "android.hardware.audio.sounddose-V3-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_audio_sounddose-V4-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.audio.sounddose-V4-ndk.so"],
+    stem: "android.hardware.audio.sounddose-V4-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_camera_common_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.camera.common@1.0.so"],
+    stem: "android.hardware.camera.common@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_camera_device_3_2",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.camera.device@3.2.so"],
+    stem: "android.hardware.camera.device@3.2",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_cas_native_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.cas.native@1.0.so"],
+    stem: "android.hardware.cas.native@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_cas_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.cas@1.0.so"],
+    stem: "android.hardware.cas@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_common-V2-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.common-V2-cpp.so"],
+    stem: "android.hardware.common-V2-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_common-V2-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.common-V2-ndk.so"],
+    stem: "android.hardware.common-V2-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_common_fmq-V1-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.common.fmq-V1-cpp.so"],
+    stem: "android.hardware.common.fmq-V1-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_common_fmq-V1-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.common.fmq-V1-ndk.so"],
+    stem: "android.hardware.common.fmq-V1-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_configstore-utils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.configstore-utils.so"],
+    stem: "android.hardware.configstore-utils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_configstore_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.configstore@1.0.so"],
+    stem: "android.hardware.configstore@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_configstore_1_1",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.configstore@1.1.so"],
+    stem: "android.hardware.configstore@1.1",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_contexthub-V5-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.contexthub-V5-ndk.so"],
+    stem: "android.hardware.contexthub-V5-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_drm-V1-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.drm-V1-ndk.so"],
+    stem: "android.hardware.drm-V1-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_drm-V2-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.drm-V2-ndk.so"],
+    stem: "android.hardware.drm-V2-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_drm_common-V1-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.drm.common-V1-ndk.so"],
+    stem: "android.hardware.drm.common-V1-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_drm_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.drm@1.0.so"],
+    stem: "android.hardware.drm@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_drm_1_1",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.drm@1.1.so"],
+    stem: "android.hardware.drm@1.1",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_drm_1_2",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.drm@1.2.so"],
+    stem: "android.hardware.drm@1.2",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_drm_1_3",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.drm@1.3.so"],
+    stem: "android.hardware.drm@1.3",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_drm_1_4",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.drm@1.4.so"],
+    stem: "android.hardware.drm@1.4",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_allocator-V1-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.allocator-V1-ndk.so"],
+    stem: "android.hardware.graphics.allocator-V1-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_allocator-V2-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.allocator-V2-ndk.so"],
+    stem: "android.hardware.graphics.allocator-V2-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_allocator_2_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.allocator@2.0.so"],
+    stem: "android.hardware.graphics.allocator@2.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_allocator_3_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.allocator@3.0.so"],
+    stem: "android.hardware.graphics.allocator@3.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_allocator_4_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.allocator@4.0.so"],
+    stem: "android.hardware.graphics.allocator@4.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_bufferqueue_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.bufferqueue@1.0.so"],
+    stem: "android.hardware.graphics.bufferqueue@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_bufferqueue_2_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.bufferqueue@2.0.so"],
+    stem: "android.hardware.graphics.bufferqueue@2.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_common-V3-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.common-V3-ndk.so"],
+    stem: "android.hardware.graphics.common-V3-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_common-V4-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.common-V4-ndk.so"],
+    stem: "android.hardware.graphics.common-V4-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_common-V5-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.common-V5-ndk.so"],
+    stem: "android.hardware.graphics.common-V5-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_common-V6-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.common-V6-ndk.so"],
+    stem: "android.hardware.graphics.common-V6-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_common-V7-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.common-V7-ndk.so"],
+    stem: "android.hardware.graphics.common-V7-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_common_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.common@1.0.so"],
+    stem: "android.hardware.graphics.common@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_common_1_1",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.common@1.1.so"],
+    stem: "android.hardware.graphics.common@1.1",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_common_1_2",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.common@1.2.so"],
+    stem: "android.hardware.graphics.common@1.2",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_composer3-V1-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.composer3-V1-ndk.so"],
+    stem: "android.hardware.graphics.composer3-V1-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_composer3-V2-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.composer3-V2-ndk.so"],
+    stem: "android.hardware.graphics.composer3-V2-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_composer3-V3-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.composer3-V3-ndk.so"],
+    stem: "android.hardware.graphics.composer3-V3-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_composer3-V4-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.composer3-V4-ndk.so"],
+    stem: "android.hardware.graphics.composer3-V4-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_composer3-V5-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.composer3-V5-ndk.so"],
+    stem: "android.hardware.graphics.composer3-V5-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_mapper_2_0-impl-2_1",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.mapper@2.0-impl-2.1.so"],
+    stem: "android.hardware.graphics.mapper@2.0-impl-2.1",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_mapper_2_0-impl",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.mapper@2.0-impl.so"],
+    stem: "android.hardware.graphics.mapper@2.0-impl",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_mapper_2_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.mapper@2.0.so"],
+    stem: "android.hardware.graphics.mapper@2.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_mapper_2_1",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.mapper@2.1.so"],
+    stem: "android.hardware.graphics.mapper@2.1",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_mapper_3_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.mapper@3.0.so"],
+    stem: "android.hardware.graphics.mapper@3.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_graphics_mapper_4_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.graphics.mapper@4.0.so"],
+    stem: "android.hardware.graphics.mapper@4.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_media_bufferpool2-V1-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.media.bufferpool2-V1-ndk.so"],
+    stem: "android.hardware.media.bufferpool2-V1-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_media_bufferpool2-V2-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.media.bufferpool2-V2-ndk.so"],
+    stem: "android.hardware.media.bufferpool2-V2-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_media_bufferpool_2_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.media.bufferpool@2.0.so"],
+    stem: "android.hardware.media.bufferpool@2.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_media_c2-V1-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.media.c2-V1-ndk.so"],
+    stem: "android.hardware.media.c2-V1-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_media_c2-V2-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.media.c2-V2-ndk.so"],
+    stem: "android.hardware.media.c2-V2-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_media_c2_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.media.c2@1.0.so"],
+    stem: "android.hardware.media.c2@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_media_c2_1_1",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.media.c2@1.1.so"],
+    stem: "android.hardware.media.c2@1.1",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_media_c2_1_2",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.media.c2@1.2.so"],
+    stem: "android.hardware.media.c2@1.2",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_media_omx_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.media.omx@1.0.so"],
+    stem: "android.hardware.media.omx@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_media_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.media@1.0.so"],
+    stem: "android.hardware.media@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_memtrack-V1-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.memtrack-V1-ndk.so"],
+    stem: "android.hardware.memtrack-V1-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_memtrack_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.memtrack@1.0.so"],
+    stem: "android.hardware.memtrack@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_power-V3-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.power-V3-cpp.so"],
+    stem: "android.hardware.power-V3-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_power-V4-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.power-V4-cpp.so"],
+    stem: "android.hardware.power-V4-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_power-V4-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.power-V4-ndk.so"],
+    stem: "android.hardware.power-V4-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_power-V5-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.power-V5-ndk.so"],
+    stem: "android.hardware.power-V5-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_power-V6-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.power-V6-ndk.so"],
+    stem: "android.hardware.power-V6-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_power-V7-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.power-V7-ndk.so"],
+    stem: "android.hardware.power-V7-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_power_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.power@1.0.so"],
+    stem: "android.hardware.power@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_power_1_1",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.power@1.1.so"],
+    stem: "android.hardware.power@1.1",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_power_1_2",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.power@1.2.so"],
+    stem: "android.hardware.power@1.2",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_power_1_3",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.power@1.3.so"],
+    stem: "android.hardware.power@1.3",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hardware_renderscript_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hardware.renderscript@1.0.so"],
+    stem: "android.hardware.renderscript@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hidl_allocator_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hidl.allocator@1.0.so"],
+    stem: "android.hidl.allocator@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hidl_memory_token_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hidl.memory.token@1.0.so"],
+    stem: "android.hidl.memory.token@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hidl_memory_1_0-impl",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hidl.memory@1.0-impl.so"],
+    stem: "android.hidl.memory@1.0-impl",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hidl_memory_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hidl.memory@1.0.so"],
+    stem: "android.hidl.memory@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hidl_safe_union_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hidl.safe_union@1.0.so"],
+    stem: "android.hidl.safe_union@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hidl_token_1_0-utils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hidl.token@1.0-utils.so"],
+    stem: "android.hidl.token@1.0-utils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_hidl_token_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.hidl.token@1.0.so"],
+    stem: "android.hidl.token@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_media_audio-aconfig-cc",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.media.audio-aconfig-cc.so"],
+    stem: "android.media.audio-aconfig-cc",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_media_audio_common_types-V1-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.media.audio.common.types-V1-cpp.so"],
+    stem: "android.media.audio.common.types-V1-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_media_audio_common_types-V2-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.media.audio.common.types-V2-cpp.so"],
+    stem: "android.media.audio.common.types-V2-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_media_audio_common_types-V2-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.media.audio.common.types-V2-ndk.so"],
+    stem: "android.media.audio.common.types-V2-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_media_audio_common_types-V3-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.media.audio.common.types-V3-cpp.so"],
+    stem: "android.media.audio.common.types-V3-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_media_audio_common_types-V3-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.media.audio.common.types-V3-ndk.so"],
+    stem: "android.media.audio.common.types-V3-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_media_audio_common_types-V4-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.media.audio.common.types-V4-cpp.so"],
+    stem: "android.media.audio.common.types-V4-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_media_audio_common_types-V4-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.media.audio.common.types-V4-ndk.so"],
+    stem: "android.media.audio.common.types-V4-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_media_audio_common_types-V5-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.media.audio.common.types-V5-cpp.so"],
+    stem: "android.media.audio.common.types-V5-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_media_audio_common_types-V5-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.media.audio.common.types-V5-ndk.so"],
+    stem: "android.media.audio.common.types-V5-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_media_audiopolicy-aconfig-cc",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.media.audiopolicy-aconfig-cc.so"],
+    stem: "android.media.audiopolicy-aconfig-cc",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_os_flags-aconfig-cc-host",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.os.flags-aconfig-cc-host.so"],
+    stem: "android.os.flags-aconfig-cc-host",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_os_flags-aconfig-cc",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.os.flags-aconfig-cc.so"],
+    stem: "android.os.flags-aconfig-cc",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_system_suspend-V1-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.system.suspend-V1-ndk.so"],
+    stem: "android.system.suspend-V1-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_system_virtualizationcommon-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.system.virtualizationcommon-ndk.so"],
+    stem: "android.system.virtualizationcommon-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_android_system_virtualizationservice-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/android.system.virtualizationservice-ndk.so"],
+    stem: "android.system.virtualizationservice-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_audio-permission-aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/audio-permission-aidl-cpp.so"],
+    stem: "audio-permission-aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_audioclient-types-aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/audioclient-types-aidl-cpp.so"],
+    stem: "audioclient-types-aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_audioflinger-aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/audioflinger-aidl-cpp.so"],
+    stem: "audioflinger-aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_audiopermissioncontroller",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/audiopermissioncontroller.so"],
+    stem: "audiopermissioncontroller",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_audiopolicy-aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/audiopolicy-aidl-cpp.so"],
+    stem: "audiopolicy-aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_audiopolicy-types-aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/audiopolicy-types-aidl-cpp.so"],
+    stem: "audiopolicy-types-aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_av-types-aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/av-types-aidl-cpp.so"],
+    stem: "av-types-aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_camera_platform_flags_c_lib",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/camera_platform_flags_c_lib.so"],
+    stem: "camera_platform_flags_c_lib",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_capture_state_listener-aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/capture_state_listener-aidl-cpp.so"],
+    stem: "capture_state_listener-aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_chre_flags_c_lib",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/chre_flags_c_lib.so"],
+    stem: "chre_flags_c_lib",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_com_android_media_aaudio-aconfig-cc",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/com.android.media.aaudio-aconfig-cc.so"],
+    stem: "com.android.media.aaudio-aconfig-cc",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_com_android_media_audio-aconfig-cc",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/com.android.media.audio-aconfig-cc.so"],
+    stem: "com.android.media.audio-aconfig-cc",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_com_android_media_audioclient-aconfig-cc",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/com.android.media.audioclient-aconfig-cc.so"],
+    stem: "com.android.media.audioclient-aconfig-cc",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_com_android_media_audioserver-aconfig-cc",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/com.android.media.audioserver-aconfig-cc.so"],
+    stem: "com.android.media.audioserver-aconfig-cc",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_com_android_window_flags_window-aconfig_flags_c_lib",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/com.android.window.flags.window-aconfig_flags_c_lib.so"],
+    stem: "com.android.window.flags.window-aconfig_flags_c_lib",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_contexthub_data_flow",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/contexthub_data_flow.so"],
+    stem: "contexthub_data_flow",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_dynamic_instrumentation_manager_aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/dynamic_instrumentation_manager_aidl-cpp.so"],
+    stem: "dynamic_instrumentation_manager_aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_effect-aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/effect-aidl-cpp.so"],
+    stem: "effect-aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_framework-permission-aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/framework-permission-aidl-cpp.so"],
+    stem: "framework-permission-aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_gralloc_minigbm",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/gralloc.minigbm.so"],
+    stem: "gralloc.minigbm",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_graphicbuffersource-aidl-ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/graphicbuffersource-aidl-ndk.so"],
+    stem: "graphicbuffersource-aidl-ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_heapprofd_client_api",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/heapprofd_client_api.so"],
+    stem: "heapprofd_client_api",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_ld-android",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/ld-android.so"],
+    stem: "ld-android",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_lib-camera-compatibility-info-api",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/lib-camera-compatibility-info-api.so"],
+    stem: "lib-camera-compatibility-info-api",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_lib-platform-compat-native-api",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/lib-platform-compat-native-api.so"],
+    stem: "lib-platform-compat-native-api",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libEGL",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libEGL.so"],
+    stem: "libEGL",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libEGL_angle",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libEGL_angle.so"],
+    stem: "libEGL_angle",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libETC1",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libETC1.so"],
+    stem: "libETC1",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libGLESv1_CM",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libGLESv1_CM.so"],
+    stem: "libGLESv1_CM",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libGLESv1_CM_angle",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libGLESv1_CM_angle.so"],
+    stem: "libGLESv1_CM_angle",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libGLESv2",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libGLESv2.so"],
+    stem: "libGLESv2",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libGLESv2_angle",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libGLESv2_angle.so"],
+    stem: "libGLESv2_angle",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libGLESv3",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libGLESv3.so"],
+    stem: "libGLESv3",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libOpenMAXAL",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libOpenMAXAL.so"],
+    stem: "libOpenMAXAL",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libOpenSLES",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libOpenSLES.so"],
+    stem: "libOpenSLES",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libPlatformProperties",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libPlatformProperties.so"],
+    stem: "libPlatformProperties",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libRS",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libRS.so"],
+    stem: "libRS",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libRSCacheDir",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libRSCacheDir.so"],
+    stem: "libRSCacheDir",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libRSCpuRef",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libRSCpuRef.so"],
+    stem: "libRSCpuRef",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libRSDriver",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libRSDriver.so"],
+    stem: "libRSDriver",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libRS_internal",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libRS_internal.so"],
+    stem: "libRS_internal",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libRScpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libRScpp.so"],
+    stem: "libRScpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libSurfaceFlingerProp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libSurfaceFlingerProp.so"],
+    stem: "libSurfaceFlingerProp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaaudio",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaaudio.so"],
+    stem: "libaaudio",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaaudio_internal",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaaudio_internal.so"],
+    stem: "libaaudio_internal",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaaudio_internal_builder",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaaudio_internal_builder.so"],
+    stem: "libaaudio_internal_builder",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaaudio_internal_core",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaaudio_internal_core.so"],
+    stem: "libaaudio_internal_core",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaaudio_internal_fifo",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaaudio_internal_fifo.so"],
+    stem: "libaaudio_internal_fifo",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaaudio_internal_legacy",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaaudio_internal_legacy.so"],
+    stem: "libaaudio_internal_legacy",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaaudio_internal_mmap",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaaudio_internal_mmap.so"],
+    stem: "libaaudio_internal_mmap",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaaudio_internal_utils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaaudio_internal_utils.so"],
+    stem: "libaaudio_internal_utils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaconfig_storage_read_api_cc",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaconfig_storage_read_api_cc.so"],
+    stem: "libaconfig_storage_read_api_cc",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libactivitymanager_aidl",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libactivitymanager_aidl.so"],
+    stem: "libactivitymanager_aidl",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libamidi",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libamidi.so"],
+    stem: "libamidi",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libandroid",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libandroid.so"],
+    stem: "libandroid",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libandroid_net",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libandroid_net.so"],
+    stem: "libandroid_net",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libandroid_runtime",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libandroid_runtime.so"],
+    stem: "libandroid_runtime",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libandroid_runtime_lazy",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libandroid_runtime_lazy.so"],
+    stem: "libandroid_runtime_lazy",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libandroidfw",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libandroidfw.so"],
+    stem: "libandroidfw",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libandroidicu",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libandroidicu.so"],
+    stem: "libandroidicu",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libapexsupport",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libapexsupport.so"],
+    stem: "libapexsupport",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libappfuse",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libappfuse.so"],
+    stem: "libappfuse",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libarchivestager",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libarchivestager.so"],
+    stem: "libarchivestager",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libart-compiler",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libart-compiler.so"],
+    stem: "libart-compiler",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libart-disassembler",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libart-disassembler.so"],
+    stem: "libart-disassembler",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libart-simulator-container",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libart-simulator-container.so"],
+    stem: "libart-simulator-container",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libart",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libart.so"],
+    stem: "libart",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libartbase",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libartbase.so"],
+    stem: "libartbase",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libartbased",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libartbased.so"],
+    stem: "libartbased",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libartpalette-system",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libartpalette-system.so"],
+    stem: "libartpalette-system",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libartpalette",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libartpalette.so"],
+    stem: "libartpalette",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudio_aidl_conversion_common_cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudio_aidl_conversion_common_cpp.so"],
+    stem: "libaudio_aidl_conversion_common_cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudio_aidl_conversion_common_ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudio_aidl_conversion_common_ndk.so"],
+    stem: "libaudio_aidl_conversion_common_ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudiobase",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudiobase.so"],
+    stem: "libaudiobase",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudioclient",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudioclient.so"],
+    stem: "libaudioclient",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudioclient_aidl_conversion",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudioclient_aidl_conversion.so"],
+    stem: "libaudioclient_aidl_conversion",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudioflinger",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudioflinger.so"],
+    stem: "libaudioflinger",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudioflinger_datapath",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudioflinger_datapath.so"],
+    stem: "libaudioflinger_datapath",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudioflinger_fastpath",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudioflinger_fastpath.so"],
+    stem: "libaudioflinger_fastpath",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudioflinger_timing",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudioflinger_timing.so"],
+    stem: "libaudioflinger_timing",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudioflinger_utils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudioflinger_utils.so"],
+    stem: "libaudioflinger_utils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudiofoundation",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudiofoundation.so"],
+    stem: "libaudiofoundation",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudiohal",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudiohal.so"],
+    stem: "libaudiohal",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudiomanager",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudiomanager.so"],
+    stem: "libaudiomanager",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudiopermission",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudiopermission.so"],
+    stem: "libaudiopermission",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudiopolicy",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudiopolicy.so"],
+    stem: "libaudiopolicy",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudioprocessing",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudioprocessing.so"],
+    stem: "libaudioprocessing",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudiospdif",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudiospdif.so"],
+    stem: "libaudiospdif",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libaudioutils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libaudioutils.so"],
+    stem: "libaudioutils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libbacktrace",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libbacktrace.so"],
+    stem: "libbacktrace",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libbase",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libbase.so"],
+    stem: "libbase",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libbattery",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libbattery.so"],
+    stem: "libbattery",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libbcinfo",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libbcinfo.so"],
+    stem: "libbcinfo",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libbinder",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libbinder.so"],
+    stem: "libbinder",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libbinder_ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libbinder_ndk.so"],
+    stem: "libbinder_ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libbinderdebug",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libbinderdebug.so"],
+    stem: "libbinderdebug",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libblas",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libblas.so"],
+    stem: "libblas",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libbpf_bcc",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libbpf_bcc.so"],
+    stem: "libbpf_bcc",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libbpf_minimal",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libbpf_minimal.so"],
+    stem: "libbpf_minimal",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libbufferhub",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libbufferhub.so"],
+    stem: "libbufferhub",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libbufferhubqueue",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libbufferhubqueue.so"],
+    stem: "libbufferhubqueue",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libc__",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libc++.so"],
+    stem: "libc++",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcamera2ndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcamera2ndk.so"],
+    stem: "libcamera2ndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcamera_client",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcamera_client.so"],
+    stem: "libcamera_client",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcamera_metadata",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcamera_metadata.so"],
+    stem: "libcamera_metadata",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcameracompatbilityinfo",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcameracompatbilityinfo.so"],
+    stem: "libcameracompatbilityinfo",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcap",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcap.so"],
+    stem: "libcap",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcgrouprc",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcgrouprc.so"],
+    stem: "libcgrouprc",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libclang_rt_asan-aarch64-android",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libclang_rt.asan-aarch64-android.so"],
+    stem: "libclang_rt.asan-aarch64-android",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libclang_rt_hwasan-aarch64-android",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libclang_rt.hwasan-aarch64-android.so"],
+    stem: "libclang_rt.hwasan-aarch64-android",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libclang_rt_ubsan_standalone-aarch64-android",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libclang_rt.ubsan_standalone-aarch64-android.so"],
+    stem: "libclang_rt.ubsan_standalone-aarch64-android",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcodec2",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcodec2.so"],
+    stem: "libcodec2",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcodec2_aidl",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcodec2_aidl.so"],
+    stem: "libcodec2_aidl",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcodec2_aidl_client",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcodec2_aidl_client.so"],
+    stem: "libcodec2_aidl_client",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcodec2_client",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcodec2_client.so"],
+    stem: "libcodec2_client",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcodec2_hal_common",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcodec2_hal_common.so"],
+    stem: "libcodec2_hal_common",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcodec2_hidl_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcodec2_hidl@1.0.so"],
+    stem: "libcodec2_hidl@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcodec2_hidl_1_1",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcodec2_hidl@1.1.so"],
+    stem: "libcodec2_hidl@1.1",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcodec2_hidl_1_2",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcodec2_hidl@1.2.so"],
+    stem: "libcodec2_hidl@1.2",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcodec2_hidl_client_1_0",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcodec2_hidl_client@1.0.so"],
+    stem: "libcodec2_hidl_client@1.0",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcodec2_hidl_client_1_1",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcodec2_hidl_client@1.1.so"],
+    stem: "libcodec2_hidl_client@1.1",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcodec2_hidl_client_1_2",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcodec2_hidl_client@1.2.so"],
+    stem: "libcodec2_hidl_client@1.2",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcodec2_soft_common",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcodec2_soft_common.so"],
+    stem: "libcodec2_soft_common",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcodec2_vndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcodec2_vndk.so"],
+    stem: "libcodec2_vndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcom_android_tethering_connectivity_native",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcom.android.tethering.connectivity_native.so"],
+    stem: "libcom.android.tethering.connectivity_native",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcompiler_rt",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcompiler_rt.so"],
+    stem: "libcompiler_rt",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcore_jni_flags_c",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcore_jni_flags_c.so"],
+    stem: "libcore_jni_flags_c",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcrypto",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcrypto.so"],
+    stem: "libcrypto",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libcutils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libcutils.so"],
+    stem: "libcutils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libdataloader",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libdataloader.so"],
+    stem: "libdataloader",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libdatasource",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libdatasource.so"],
+    stem: "libdatasource",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libdebuggerd_client",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libdebuggerd_client.so"],
+    stem: "libdebuggerd_client",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libdebugstore_cxx",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libdebugstore_cxx.so"],
+    stem: "libdebugstore_cxx",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libdexfile",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libdexfile.so"],
+    stem: "libdexfile",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libdl",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libdl.so"],
+    stem: "libdl",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libdl_android",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libdl_android.so"],
+    stem: "libdl_android",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libdmabufheap",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libdmabufheap.so"],
+    stem: "libdmabufheap",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libdng_sdk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libdng_sdk.so"],
+    stem: "libdng_sdk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libdrm",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libdrm.so"],
+    stem: "libdrm",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libegl_flags",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libegl_flags.so"],
+    stem: "libegl_flags",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libelfutils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libelfutils.so"],
+    stem: "libelfutils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libexpat",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libexpat.so"],
+    stem: "libexpat",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libfmq",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libfmq.so"],
+    stem: "libfmq",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libft2",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libft2.so"],
+    stem: "libft2",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libgralloctypes",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libgralloctypes.so"],
+    stem: "libgralloctypes",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libgraphicsenv",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libgraphicsenv.so"],
+    stem: "libgraphicsenv",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libgui",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libgui.so"],
+    stem: "libgui",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libguiflags",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libguiflags.so"],
+    stem: "libguiflags",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libhardware",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libhardware.so"],
+    stem: "libhardware",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libhardware_legacy",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libhardware_legacy.so"],
+    stem: "libhardware_legacy",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libharfbuzz_ng",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libharfbuzz_ng.so"],
+    stem: "libharfbuzz_ng",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libharfbuzz_subset",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libharfbuzz_subset.so"],
+    stem: "libharfbuzz_subset",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libheif",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libheif.so"],
+    stem: "libheif",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libhidl-gen-utils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libhidl-gen-utils.so"],
+    stem: "libhidl-gen-utils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libhidlallocatorutils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libhidlallocatorutils.so"],
+    stem: "libhidlallocatorutils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libhidlbase",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libhidlbase.so"],
+    stem: "libhidlbase",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libhidlmemory",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libhidlmemory.so"],
+    stem: "libhidlmemory",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libhwui",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libhwui.so"],
+    stem: "libhwui",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libicu",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libicu.so"],
+    stem: "libicu",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libicu_jni",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libicu_jni.so"],
+    stem: "libicu_jni",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libicui18n",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libicui18n.so"],
+    stem: "libicui18n",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libicuuc",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libicuuc.so"],
+    stem: "libicuuc",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libimage_io",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libimage_io.so"],
+    stem: "libimage_io",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libimg_utils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libimg_utils.so"],
+    stem: "libimg_utils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libincfs",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libincfs.so"],
+    stem: "libincfs",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libinput",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libinput.so"],
+    stem: "libinput",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libion",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libion.so"],
+    stem: "libion",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libjnigraphics",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libjnigraphics.so"],
+    stem: "libjnigraphics",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libjpeg",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libjpeg.so"],
+    stem: "libjpeg",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libjpegdecoder",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libjpegdecoder.so"],
+    stem: "libjpegdecoder",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libjpegencoder",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libjpegencoder.so"],
+    stem: "libjpegencoder",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libjxl",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libjxl.so"],
+    stem: "libjxl",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_liblog",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/liblog.so"],
+    stem: "liblog",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_liblog_rust_dylib",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/liblog_rust.dylib.so"],
+    stem: "liblog_rust.dylib",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_liblz4",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/liblz4.so"],
+    stem: "liblz4",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_liblzma",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/liblzma.so"],
+    stem: "liblzma",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libm",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libm.so"],
+    stem: "libm",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmedia",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmedia.so"],
+    stem: "libmedia",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmedia_codeclist",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmedia_codeclist.so"],
+    stem: "libmedia_codeclist",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmedia_codeclist_capabilities",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmedia_codeclist_capabilities.so"],
+    stem: "libmedia_codeclist_capabilities",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmedia_helper",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmedia_helper.so"],
+    stem: "libmedia_helper",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmedia_jni_utils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmedia_jni_utils.so"],
+    stem: "libmedia_jni_utils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmedia_omx",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmedia_omx.so"],
+    stem: "libmedia_omx",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmedia_omx_client",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmedia_omx_client.so"],
+    stem: "libmedia_omx_client",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmedia_quality_include",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmedia_quality_include.so"],
+    stem: "libmedia_quality_include",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmediadrm",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmediadrm.so"],
+    stem: "libmediadrm",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmediadrmmetrics_lite",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmediadrmmetrics_lite.so"],
+    stem: "libmediadrmmetrics_lite",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmediaformatshaper",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmediaformatshaper.so"],
+    stem: "libmediaformatshaper",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmedialogservice",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmedialogservice.so"],
+    stem: "libmedialogservice",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmediametrics",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmediametrics.so"],
+    stem: "libmediametrics",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmediandk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmediandk.so"],
+    stem: "libmediandk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmediandk_utils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmediandk_utils.so"],
+    stem: "libmediandk_utils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmediatranscoder",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmediatranscoder.so"],
+    stem: "libmediatranscoder",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmediatranscoding",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmediatranscoding.so"],
+    stem: "libmediatranscoding",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmediautils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmediautils.so"],
+    stem: "libmediautils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmeminfo",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmeminfo.so"],
+    stem: "libmeminfo",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmemtrack",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmemtrack.so"],
+    stem: "libmemtrack",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libmemunreachable",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libmemunreachable.so"],
+    stem: "libmemunreachable",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libminigbm_gralloc",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libminigbm_gralloc.so"],
+    stem: "libminigbm_gralloc",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libminijail",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libminijail.so"],
+    stem: "libminijail",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libminikin",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libminikin.so"],
+    stem: "libminikin",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libnativebridge",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libnativebridge.so"],
+    stem: "libnativebridge",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libnativebridge_lazy",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libnativebridge_lazy.so"],
+    stem: "libnativebridge_lazy",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libnativedisplay",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libnativedisplay.so"],
+    stem: "libnativedisplay",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libnativehelper",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libnativehelper.so"],
+    stem: "libnativehelper",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libnativeloader",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libnativeloader.so"],
+    stem: "libnativeloader",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libnativeloader_lazy",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libnativeloader_lazy.so"],
+    stem: "libnativeloader_lazy",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libnativewindow",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libnativewindow.so"],
+    stem: "libnativewindow",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libnbaio",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libnbaio.so"],
+    stem: "libnbaio",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libnblog",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libnblog.so"],
+    stem: "libnblog",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libnetd_client",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libnetd_client.so"],
+    stem: "libnetd_client",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libnetdutils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libnetdutils.so"],
+    stem: "libnetdutils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libnetworkstats",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libnetworkstats.so"],
+    stem: "libnetworkstats",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libneuralnetworks",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libneuralnetworks.so"],
+    stem: "libneuralnetworks",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libneuralnetworks_packageinfo",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libneuralnetworks_packageinfo.so"],
+    stem: "libneuralnetworks_packageinfo",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libonce_cell_dylib",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libonce_cell.dylib.so"],
+    stem: "libonce_cell.dylib",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libopus",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libopus.so"],
+    stem: "libopus",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libpackagelistparser",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libpackagelistparser.so"],
+    stem: "libpackagelistparser",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libpcre2",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libpcre2.so"],
+    stem: "libpcre2",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libpdfium",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libpdfium.so"],
+    stem: "libpdfium",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libpdx_default_transport",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libpdx_default_transport.so"],
+    stem: "libpdx_default_transport",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libperfetto_c",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libperfetto_c.so"],
+    stem: "libperfetto_c",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libperfetto_framework_jni",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libperfetto_framework_jni.so"],
+    stem: "libperfetto_framework_jni",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libpermission",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libpermission.so"],
+    stem: "libpermission",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libpiex",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libpiex.so"],
+    stem: "libpiex",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libpng",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libpng.so"],
+    stem: "libpng",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libpowermanager",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libpowermanager.so"],
+    stem: "libpowermanager",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libprocessgroup",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libprocessgroup.so"],
+    stem: "libprocessgroup",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libprocessgroup_flags_c",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libprocessgroup_flags_c.so"],
+    stem: "libprocessgroup_flags_c",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libprocessgroup_platform",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libprocessgroup_platform.so"],
+    stem: "libprocessgroup_platform",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libprocinfo",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libprocinfo.so"],
+    stem: "libprocinfo",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libprofile",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libprofile.so"],
+    stem: "libprofile",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libprotobuf-cpp-lite-6_33_5-absl20260526",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libprotobuf-cpp-lite-6.33.5-absl20260526.so"],
+    stem: "libprotobuf-cpp-lite-6.33.5-absl20260526",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libprotobuf-cpp-lite",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libprotobuf-cpp-lite.so"],
+    stem: "libprotobuf-cpp-lite",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libprotolog",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libprotolog.so"],
+    stem: "libprotolog",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libselinux",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libselinux.so"],
+    stem: "libselinux",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libsensor",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libsensor.so"],
+    stem: "libsensor",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libsfplugin_ccodec",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libsfplugin_ccodec.so"],
+    stem: "libsfplugin_ccodec",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libsfplugin_ccodec_utils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libsfplugin_ccodec_utils.so"],
+    stem: "libsfplugin_ccodec_utils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libshmemcompat",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libshmemcompat.so"],
+    stem: "libshmemcompat",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libshmemutil",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libshmemutil.so"],
+    stem: "libshmemutil",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libsigchain",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libsigchain.so"],
+    stem: "libsigchain",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libsonic",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libsonic.so"],
+    stem: "libsonic",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libsounddose",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libsounddose.so"],
+    stem: "libsounddose",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libspeexresampler",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libspeexresampler.so"],
+    stem: "libspeexresampler",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libsqlite",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libsqlite.so"],
+    stem: "libsqlite",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libssl",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libssl.so"],
+    stem: "libssl",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright.so"],
+    stem: "libstagefright",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_aidl_bufferpool2",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_aidl_bufferpool2.so"],
+    stem: "libstagefright_aidl_bufferpool2",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_amrnb_common",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_amrnb_common.so"],
+    stem: "libstagefright_amrnb_common",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_bufferpool_2_0_1",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_bufferpool@2.0.1.so"],
+    stem: "libstagefright_bufferpool@2.0.1",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_bufferqueue_helper",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_bufferqueue_helper.so"],
+    stem: "libstagefright_bufferqueue_helper",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_bufferqueue_helper_novndk",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_bufferqueue_helper_novndk.so"],
+    stem: "libstagefright_bufferqueue_helper_novndk",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_codecbase",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_codecbase.so"],
+    stem: "libstagefright_codecbase",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_enc_common",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_enc_common.so"],
+    stem: "libstagefright_enc_common",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_flacdec",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_flacdec.so"],
+    stem: "libstagefright_flacdec",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_foundation",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_foundation.so"],
+    stem: "libstagefright_foundation",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_framecapture_utils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_framecapture_utils.so"],
+    stem: "libstagefright_framecapture_utils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_graphicbuffersource_aidl",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_graphicbuffersource_aidl.so"],
+    stem: "libstagefright_graphicbuffersource_aidl",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_http_support",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_http_support.so"],
+    stem: "libstagefright_http_support",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_omx",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_omx.so"],
+    stem: "libstagefright_omx",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_omx_utils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_omx_utils.so"],
+    stem: "libstagefright_omx_utils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_persistentsurface",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_persistentsurface.so"],
+    stem: "libstagefright_persistentsurface",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_surface_utils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_surface_utils.so"],
+    stem: "libstagefright_surface_utils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstagefright_xmlparser",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstagefright_xmlparser.so"],
+    stem: "libstagefright_xmlparser",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstatspull",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstatspull.so"],
+    stem: "libstatspull",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstatssocket",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstatssocket.so"],
+    stem: "libstatssocket",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstd_dylib",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstd.dylib.so"],
+    stem: "libstd.dylib",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libstdc__",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libstdc++.so"],
+    stem: "libstdc++",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libsync",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libsync.so"],
+    stem: "libsync",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libtimeinstate",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libtimeinstate.so"],
+    stem: "libtimeinstate",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libtinyxml2",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libtinyxml2.so"],
+    stem: "libtinyxml2",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libtombstoned_client",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libtombstoned_client.so"],
+    stem: "libtombstoned_client",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libtracing_perfetto",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libtracing_perfetto.so"],
+    stem: "libtracing_perfetto",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libui",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libui.so"],
+    stem: "libui",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libultrahdr",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libultrahdr.so"],
+    stem: "libultrahdr",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libunwindstack",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libunwindstack.so"],
+    stem: "libunwindstack",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libusbhost",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libusbhost.so"],
+    stem: "libusbhost",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libutils",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libutils.so"],
+    stem: "libutils",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libutilscallstack",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libutilscallstack.so"],
+    stem: "libutilscallstack",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libvibrator",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libvibrator.so"],
+    stem: "libvibrator",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libvintf",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libvintf.so"],
+    stem: "libvintf",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libvndksupport",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libvndksupport.so"],
+    stem: "libvndksupport",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libvpx",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libvpx.so"],
+    stem: "libvpx",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libvulkan",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libvulkan.so"],
+    stem: "libvulkan",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libwebviewchromium_plat_support",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libwebviewchromium_plat_support.so"],
+    stem: "libwebviewchromium_plat_support",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libwilhelm",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libwilhelm.so"],
+    stem: "libwilhelm",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libxml2",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libxml2.so"],
+    stem: "libxml2",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libz",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libz.so"],
+    stem: "libz",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_libziparchive",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/libziparchive.so"],
+    stem: "libziparchive",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_media_quality_aidl_interface-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/media_quality_aidl_interface-cpp.so"],
+    stem: "media_quality_aidl_interface-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_mediametricsservice-aidl-V1-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/mediametricsservice-aidl-V1-cpp.so"],
+    stem: "mediametricsservice-aidl-V1-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_mediametricsservice-aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/mediametricsservice-aidl-cpp.so"],
+    stem: "mediametricsservice-aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_packagemanager_aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/packagemanager_aidl-cpp.so"],
+    stem: "packagemanager_aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_process_info_service_aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/process_info_service_aidl-cpp.so"],
+    stem: "process_info_service_aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_pw_allocator",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/pw_allocator.so"],
+    stem: "pw_allocator",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_server_configurable_flags",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/server_configurable_flags.so"],
+    stem: "server_configurable_flags",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_shared-file-region-aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/shared-file-region-aidl-cpp.so"],
+    stem: "shared-file-region-aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_spatializer-aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/spatializer-aidl-cpp.so"],
+    stem: "spatializer-aidl-cpp",
+    relative_install_path: "arm64",
+}
+
+cc_prebuilt_library_shared {
+    name: "houdini_guest_volumegroupcallback-aidl-cpp",
+    defaults: ["houdini_prebuilt_defaults"],
+    srcs: ["lib64/arm64/volumegroupcallback-aidl-cpp.so"],
+    stem: "volumegroupcallback-aidl-cpp",
+    relative_install_path: "arm64",
+}
