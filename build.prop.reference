@@ -1,6 +1,7 @@
-# Houdini bridge props, trimmed from the donor's full system build.prop
-# (/run/media/lenovo/Dev/libhoudini/build.prop, 188 lines, mostly donor
-# fingerprint: build IDs, dexopt, bluetooth, zram — useless here).
+# Houdini bridge props. The first two are taken verbatim from the GoogleBook
+# image's system/build.prop (188 lines; the rest of it is image fingerprint —
+# build IDs, dexopt, bluetooth, zram — useless here). The last two are the
+# 32-bit arm selection props the upstream libhoudini README §3d asks for.
 #
 # REFERENCE ONLY — nothing reads this file. The live values are
 # PRODUCT_SYSTEM_PROPERTIES in device.mk (~1274). Per the libhoudini
@@ -10,7 +11,7 @@ ro.dalvik.vm.isa.arm64=x86_64
 ro.dalvik.vm.isa.arm=x86
 ro.enable.native.bridge.exec=1
 
-# Deliberately NOT carried over from the donor dump:
-# - ro.berberis.* (donor ran berberis as 2nd bridge; README says remove)
+# Deliberately NOT carried over from the image's build.prop:
+# - ro.berberis.* (the image ran berberis as 2nd bridge; README says remove)
 # - ro.*.cpu.abilist* (generated from TARGET_NATIVE_BRIDGE_ABI; README says
 #   do not set by hand)

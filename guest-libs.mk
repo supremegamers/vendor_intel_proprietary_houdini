@@ -1,4 +1,4 @@
-# GENERATED — do not hand-edit. Full donor set; see Android.bp header.
+# GENERATED — do not hand-edit. Full stock guest set; see Android.bp header.
 PRODUCT_PACKAGES += \
     houdini_guest_aaudio-aidl-cpp \
     houdini_guest_aconfig_mediacodec_flags_c_lib \
