@@ -70,8 +70,8 @@ cc_prebuilt_binary {
     srcs: ["bin/houdini64"],
 }
 // GENERATED BLOCK (guest-libs): do not hand-edit.
-// 411 ARM64 guest-lib prebuilts = full tested donor set
-// (/run/media/lenovo/Dev/libhoudini/lib64/arm64). EXCLUDED: libc.so
+// 411 ARM64 guest-lib prebuilts = full stock guest set (GoogleBook
+// system_a image: /system/lib64/arm64). EXCLUDED: libc.so
 // (ships via the houdini_guest_libc stem module).
 
 cc_prebuilt_library_shared {

@@ -1,4 +1,4 @@
-# vendor_intel_proprietary_houdini (android17 branch)
+# vendor_intel_proprietary_houdini (gbook_ruby branch)
 
 Intel Houdini ARM64-on-x86_64 native bridge prebuilts for Android 17 (Soong).
 
